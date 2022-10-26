@@ -34,3 +34,9 @@ class BucketHelper():
         
     def getBucketItems(self, bucket_name):
         return self._getBucket(bucket_name).objects.filter(MaxKeys=1)
+        
+    def prepWidget(self, widget):
+        del widget['type']
+        del widget['requestId']
+        
+        return widget
