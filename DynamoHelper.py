@@ -3,7 +3,7 @@ import json
 
 class DynamoHelper():
     
-    dynamodb = boto3.resource('dynamodb')
+    dynamodb = boto3.resource('dynamodb', region_name='us-east-1')
     table = dynamodb.Table('widgets')
     
     def __init__(self):
@@ -30,3 +30,12 @@ class DynamoHelper():
         widget['id'] = widget.pop('widgetId')
         
         return widget
+        
+    def deleteItem(self, itemId):
+        response = self.table.delete_item(
+                Key={
+                    'id': itemId
+                }
+            )
+        
+        return response

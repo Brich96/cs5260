@@ -17,17 +17,13 @@ class BucketHelper():
         for item in b['Buckets']:
             print(item['Name'])
     
-    def deleteItem(self, bucket_name, key):
-        response = self.s3_client.delete_object(Bucket=bucket_name, Key=key)
-        return response
-    
     # TODO: implement mass delete if needed
     # response = s3_client.delete_objects(
     #     Bucket=bucket_name,
     #     Delete={"Objects": [{"Key": "text/test7.txt"}, {"Key": "text/test8.txt"}]},
     # )
     
-    def uploadItem(self, bucket_name, file_name, json_data):
+    def createItem(self, bucket_name, file_name, json_data):
         s3obj = self.s3.Object(bucket_name, file_name)
         response = s3obj.put(Body=(bytes(json.dumps(json_data).encode('UTF-8'))))
         return response
@@ -40,3 +36,7 @@ class BucketHelper():
         del widget['requestId']
         
         return widget
+        
+    def deleteItem(self, bucket_name, key):
+        response = self.s3_client.delete_object(Bucket=bucket_name, Key=key)
+        return response
