@@ -52,7 +52,7 @@ def handleRequests():
             
             elif(sys.argv[2] == 'sqs'):
                 widget = json.loads(obj)
-                print(widget)3
+                print(widget)
             
             
             
