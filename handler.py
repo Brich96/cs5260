@@ -20,6 +20,7 @@ logger.setLevel(logging.DEBUG)
 
 bucketHelper = BucketHelper()
 dynamoHelper = DynamoHelper()
+sqshelper = SQSHelper()
 
 #  TODO: items in web first
 
@@ -32,18 +33,28 @@ def handleRequests():
         if(sys.argv[2] == 's3'):
             bucketItems = bucketHelper.getBucketItems('usu-cs5260-waffle-requests')
         elif(sys.argv[2] == 'sqs'):
-            sqshelper = SQSHelper()
             bucketItems = sqshelper.getItems()
         else:
             print("invalid arguments")
             sys.exit()
         
         atLeastOneItem = False
+        key = "null";
         for obj in bucketItems:
             atLeastOneItem = True
-            widget = json.loads(obj.get()['Body'].read())
-            print(obj.key)
-            logger.info(obj.key)
+
+
+            if(sys.argv[2] == 's3'):
+                widget = json.loads(obj.get()['Body'].read())
+                key = obj.key
+                print(key)
+                logger.info(key)
+            
+            elif(sys.argv[2] == 'sqs'):
+                widget = json.loads(obj)
+                print(widget)3
+            
+            
             
             if(widget['type'] == 'create'):
                 
@@ -53,12 +64,12 @@ def handleRequests():
                     
                     file_name = 'widgets/' + prepped_widget['owner'].lower().replace(" ", "-") + prepped_widget['widgetId']
                     bucketHelper.createItem('usu-cs5260-waffle-web', file_name, prepped_widget)
-                    bucketHelper.deleteItem('usu-cs5260-waffle-requests', obj.key)
+                    bucketHelper.deleteItem('usu-cs5260-waffle-requests', key)
                     
                 elif(sys.argv[1] == 'dynamo'):
                     prepped_widget = dynamoHelper.prepWidget(widget)
                     dynamoHelper.createItem(prepped_widget)
-                    bucketHelper.deleteItem('usu-cs5260-waffle-requests', obj.key)
+                    bucketHelper.deleteItem('usu-cs5260-waffle-requests', key)
                     
             elif(widget['type'] == 'update'):
                 
@@ -67,13 +78,13 @@ def handleRequests():
                     
                     file_name = 'widgets/' + prepped_widget['owner'].lower().replace(" ", "-") + prepped_widget['widgetId']
                     bucketHelper.createItem('usu-cs5260-waffle-web', file_name, prepped_widget)
-                    bucketHelper.deleteItem('usu-cs5260-waffle-requests', obj.key)
+                    bucketHelper.deleteItem('usu-cs5260-waffle-requests', key)
                     
                 elif(sys.argv[1] == 'dynamo'):
                     prepped_widget = dynamoHelper.prepWidget(widget)
                     dynamoHelper.deleteItem(prepped_widget['id'])
                     dynamoHelper.createItem(prepped_widget)
-                    bucketHelper.deleteItem('usu-cs5260-waffle-requests', obj.key)
+                    bucketHelper.deleteItem('usu-cs5260-waffle-requests', key)
                     
             elif(widget['type'] == 'delete'):
                 
@@ -81,14 +92,14 @@ def handleRequests():
                     
                     file_name = 'widgets/' + widget['owner'].lower().replace(" ", "-") + widget['widgetId']
                     bucketHelper.deleteItem('usu-cs5260-waffle-web', file_name)
-                    bucketHelper.deleteItem('usu-cs5260-waffle-requests', obj.key)
+                    bucketHelper.deleteItem('usu-cs5260-waffle-requests', key)
                     
                 elif(sys.argv[1] == 'dynamo'):
                     dynamoHelper.deleteItem(widget['widgetId'])
-                    bucketHelper.deleteItem('usu-cs5260-waffle-requests', obj.key)
+                    bucketHelper.deleteItem('usu-cs5260-waffle-requests', key)
                 
             else:
-                bucketHelper.deleteItem('usu-cs5260-waffle-requests', obj.key)
+                bucketHelper.deleteItem('usu-cs5260-waffle-requests', key)
             
             # TODO: implement change and delete
             
