@@ -20,5 +20,13 @@ class SQSHelper():
             
             message.delete()
         return items
+    
+    def deleteItems(self):
+        sqs = boto3.resource('sqs')
+        queue = sqs.Queue('https://queue.amazonaws.com/860368004749/cs5260-requests')
+        for message in queue.receive_messages(MaxNumberOfMessages=10, VisibilityTimeout=10, AttributeNames=['All']):
+            print(message.body)
             
+            message.delete()
+                
     
